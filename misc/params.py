@@ -16,18 +16,18 @@ d_input_dims = 500
 d_hidden_dims = 500
 d_output_dims = 1
 d_steps = 5
-d_model_restore = "snapshots/WGAN-GP_critic-20000.pt"
+d_model_restore = None
 
 # params for generator
-g_model_restore = "snapshots/WGAN-GP_generator-20000.pt"
+g_model_restore = None
 
 # params for classifier
-c_model_restore = "snapshots/WGAN-GP_classifier-20000.pt"
+c_model_restore = None
 
 # params for training network
 num_gpu = 1
 num_epochs = 20000
-log_step = 1
+log_step = 100
 save_step = 5000
 manual_seed = None
 model_root = "snapshots"
