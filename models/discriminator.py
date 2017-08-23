@@ -22,11 +22,10 @@ class Discriminator(nn.Module):
             nn.ReLU(),
             nn.Linear(hidden_dims, hidden_dims),
             nn.ReLU(),
-            nn.Linear(hidden_dims, output_dims),
-            nn.LogSoftmax()
+            nn.Linear(hidden_dims, output_dims)
         )
 
     def forward(self, input):
         """Forward the discriminator."""
         out = self.layer(input)
-        return out
+        return out.view(-1)

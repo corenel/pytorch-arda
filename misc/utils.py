@@ -5,10 +5,11 @@ import random
 
 import torch
 import torch.backends.cudnn as cudnn
-from torch.autograd import Variable
+import torch.optim as optim
+from torch.autograd import Variable, grad
 
-import params
 from datasets import get_mnist, get_usps
+from misc import params
 
 
 def make_variable(tensor, volatile=False):
@@ -29,6 +30,31 @@ def denormalize(x, std, mean):
     """Invert normalization, and then convert array into image."""
     out = x * std + mean
     return out.clamp(0, 1)
+
+
+def calc_gradient_penalty(D, real_data, fake_data):
+    """Calculatge gradient penalty for WGAN-GP."""
+    alpha = torch.rand(params.batch_size, 1)
+    alpha = alpha.expand(real_data.size())
+    alpha = make_cuda(alpha)
+
+    interpolates = make_variable(alpha * real_data + ((1 - alpha) * fake_data))
+    interpolates.requires_grad = True
+
+    disc_interpolates = D(interpolates)
+
+    gradients = grad(outputs=disc_interpolates,
+                     inputs=interpolates,
+                     grad_outputs=make_cuda(
+                         torch.ones(disc_interpolates.size())),
+                     create_graph=True,
+                     retain_graph=True,
+                     only_inputs=True)[0]
+
+    gradient_penalty = params.penalty_lambda * \
+        ((gradients.norm(2, dim=1) - 1) ** 2).mean()
+
+    return gradient_penalty
 
 
 def init_weights(layer):
@@ -53,14 +79,6 @@ def init_random_seed(manual_seed):
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
-
-
-def get_data_loader(name, train=True):
-    """Get data loader by name."""
-    if name == "MNIST":
-        return get_mnist(train)
-    elif name == "USPS":
-        return get_usps(train)
 
 
 def init_model(net, restore):
@@ -90,3 +108,26 @@ def save_model(net, filename):
                os.path.join(params.model_root, filename))
     print("save pretrained model to: {}".format(os.path.join(params.model_root,
                                                              filename)))
+
+
+def get_optimizer(net, name="Adam"):
+    """Get optimizer by name."""
+    if name == "Adam":
+        return optim.Adam(net.parameters(),
+                          lr=params.learning_rate,
+                          betas=(params.beta1, params.beta2))
+
+
+def get_data_loader(name, train=True):
+    """Get data loader by name."""
+    if name == "MNIST":
+        return get_mnist(train)
+    elif name == "USPS":
+        return get_usps(train)
+
+
+def get_inf_iterator(data_loader):
+    """Inf data iterator."""
+    while True:
+        for (images_src, _), (images_tgt, _) in data_loader:
+            yield (images_src, _), (images_tgt, _)
