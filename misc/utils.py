@@ -129,5 +129,5 @@ def get_data_loader(name, train=True):
 def get_inf_iterator(data_loader):
     """Inf data iterator."""
     while True:
-        for (images_src, _), (images_tgt, _) in data_loader:
-            yield (images_src, _), (images_tgt, _)
+        for images, labels in data_loader:
+            yield (images, labels)

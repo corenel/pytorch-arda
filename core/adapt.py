@@ -26,9 +26,9 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
     optimizer_d = get_optimizer(critic, "Adam")
 
     # zip source and target data pair
-    data_zip = zip(src_data_loader, tgt_data_loader)
     len_data_loader = min(len(src_data_loader), len(tgt_data_loader))
-    data_iter = get_inf_iterator(data_zip)
+    data_iter_src = get_inf_iterator(src_data_loader)
+    data_iter_tgt = get_inf_iterator(tgt_data_loader)
 
     # counter
     data_step = 0
@@ -61,8 +61,10 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
         # loop for optimizing discriminator
         for d_step in range(critic_iters):
             # convert images into torch.Variable
-            (images_src, _), (images_tgt, _) = next(data_iter)
+            images_src, labels_src = next(data_iter_src)
+            images_tgt, _ = next(data_iter_tgt)
             images_src = make_variable(images_src)
+            labels_src = make_variable(labels_src.squeeze_())
             images_tgt = make_variable(images_tgt)
             data_step += 1
             if images_src.size(0) != params.batch_size or \
@@ -97,12 +99,6 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
         # 2.2 train classifier #
         ########################
 
-        # convert images and labels into torch.Variable
-        (images_src, labels_src), (_, _) = next(data_iter)
-        images_src = make_variable(images_src)
-        labels_src = make_variable(labels_src.squeeze_())
-        data_step += 1
-
         # zero gradients for optimizer
         optimizer_c.zero_grad()
 
@@ -120,13 +116,6 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
         # avoid to compute gradients for D
         for p in critic.parameters():
             p.requires_grad = False
-
-        # convert images into torch.Variable
-        (images_src, labels_src), (images_tgt, _) = next(data_iter)
-        images_src = make_variable(images_src)
-        labels_src = make_variable(labels_src.squeeze_())
-        images_tgt = make_variable(images_tgt)
-        data_step += 1
 
         # zero grad for optimizer of generator
         optimizer_g.zero_grad()
@@ -157,7 +146,7 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
         ##################
         # 2.4 print info #
         ##################
-        if ((g_step + 1) % params.log_step == 0):
+        if ((data_step + 1) % params.log_step == 0):
             print("Epoch [{}/{}] Step [{}/{}]:"
                   "d_loss={:.5f} c_loss={:.5f} g_loss={:.5f}"
                   .format(epoch + 1,
