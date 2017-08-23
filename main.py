@@ -34,8 +34,10 @@ if __name__ == '__main__':
     print(">>> Critic <<<")
     print(critic)
 
-    classifier, generator = train(
-        classifier, generator, critic, src_data_loader, tgt_data_loader)
+    if not (params.eval_only and classifier.restored and
+            generator.restored and critic.restored):
+        classifier, generator = train(
+            classifier, generator, critic, src_data_loader, tgt_data_loader)
 
     # evaluate models
     print("=== Evaluating models ===")

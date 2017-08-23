@@ -148,15 +148,18 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
         ##################
         if ((data_step + 1) % params.log_step == 0):
             print("Epoch [{}/{}] Step [{}/{}]:"
-                  "d_loss={:.5f} c_loss={:.5f} g_loss={:.5f}"
+                  "d_loss={:.5f} c_loss={:.5f} g_loss={:.5f} "
+                  # "D(x)={:.5f} D(G(z))={:.5f} GP={:.5f}"
                   .format(epoch + 1,
                           params.num_epochs,
                           (data_step + 1) % len_data_loader,
                           len_data_loader,
-                          g_step + 1,
                           d_loss.data[0],
                           c_loss.data[0],
                           g_loss.data[0]
+                          # d_loss_src.data[0],
+                          # d_loss_tgt.data[0],
+                          # gradient_penalty.data[0],
                           ))
 
         #############################
