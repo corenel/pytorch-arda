@@ -12,9 +12,9 @@ import urllib
 import numpy as np
 import torch
 import torch.utils.data as data
-from torchvision import datasets, transforms
+from torchvision import transforms
 
-import params
+from misc import params
 
 
 class USPS(data.Dataset):

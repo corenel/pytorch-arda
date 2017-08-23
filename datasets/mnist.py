@@ -4,7 +4,7 @@
 import torch
 from torchvision import datasets, transforms
 
-import params
+from misc import params
 
 
 def get_mnist(train):
