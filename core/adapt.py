@@ -26,12 +26,10 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
     optimizer_d = get_optimizer(critic, "Adam")
 
     # zip source and target data pair
-    len_data_loader = min(len(src_data_loader), len(tgt_data_loader))
     data_iter_src = get_inf_iterator(src_data_loader)
     data_iter_tgt = get_inf_iterator(tgt_data_loader)
 
     # counter
-    data_step = 0
     g_step = 0
 
     # positive and negative labels
@@ -66,7 +64,6 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
             images_src = make_variable(images_src)
             labels_src = make_variable(labels_src.squeeze_())
             images_tgt = make_variable(images_tgt)
-            data_step += 1
             if images_src.size(0) != params.batch_size or \
                     images_tgt.size(0) != params.batch_size:
                 continue
@@ -146,20 +143,18 @@ def train(classifier, generator, critic, src_data_loader, tgt_data_loader):
         ##################
         # 2.4 print info #
         ##################
-        if ((data_step + 1) % params.log_step == 0):
-            print("Epoch [{}/{}] Step [{}/{}]:"
+        if ((epoch + 1) % params.log_step == 0):
+            print("Epoch [{}/{}]:"
                   "d_loss={:.5f} c_loss={:.5f} g_loss={:.5f} "
-                  # "D(x)={:.5f} D(G(z))={:.5f} GP={:.5f}"
+                  "D(x)={:.5f} D(G(z))={:.5f} GP={:.5f}"
                   .format(epoch + 1,
                           params.num_epochs,
-                          (data_step + 1) % len_data_loader,
-                          len_data_loader,
                           d_loss.data[0],
                           c_loss.data[0],
-                          g_loss.data[0]
-                          # d_loss_src.data[0],
-                          # d_loss_tgt.data[0],
-                          # gradient_penalty.data[0],
+                          g_loss.data[0],
+                          d_loss_src.data[0],
+                          d_loss_tgt.data[0],
+                          gradient_penalty.data[0]
                           ))
 
         #############################
