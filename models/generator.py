@@ -16,18 +16,18 @@ class Generator(nn.Module):
         self.restored = False
 
         self.encoder = nn.Sequential(
-            # 1st conv layer
+            # 1st conv block
             # input [1 x 28 x 28]
-            # output [20 x 12 x 12]
-            nn.Conv2d(1, 20, kernel_size=5),
-            nn.MaxPool2d(kernel_size=2),
+            # output [64 x 12 x 12]
+            nn.Conv2d(1, 64, 5, 1, 0, bias=False),
+            nn.MaxPool2d(2),
             nn.ReLU(),
-            # 2nd conv layer
-            # input [20 x 12 x 12]
+            # 2nd conv block
+            # input [64 x 12 x 12]
             # output [50 x 4 x 4]
-            nn.Conv2d(20, 50, kernel_size=5),
+            nn.Conv2d(64, 50, 5, 1, 0, bias=False),
             nn.Dropout2d(),
-            nn.MaxPool2d(kernel_size=2),
+            nn.MaxPool2d(2),
             nn.ReLU()
         )
         self.fc1 = nn.Linear(50 * 4 * 4, 500)
